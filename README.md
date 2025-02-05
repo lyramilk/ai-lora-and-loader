@@ -4,7 +4,7 @@
 
 ## 项目文件
 
-	weitiao/
+	ai-lora-and-loader/
 	├── config.ini          # 配置文件
 	├── main.py            # 主程序入口
 	├── collector.py       # 代码收集模块
@@ -15,59 +15,65 @@
 
 ## 功能特性
 
-	- 代码收集
-		- 支持扫描Git仓库
-		- 自动识别代码文件
-		- 生成训练数据集
+- 代码收集
+	- 支持扫描Git仓库
+	- 自动识别代码文件
+	- 生成训练数据集
 
-	- 模型训练
-		- 支持LoRA微调
-		- 支持模型量化
-		- 可配置训练参数
-		- 支持多种保存模式
+- 模型训练
+	- 支持LoRA微调
+	- 支持模型量化
+	- 可配置训练参数
+	- 支持多种保存模式
 
-	- 在线服务
-		- Web界面交互
-		- 流式输出
-		- 支持停止生成
-		- 兼容OpenAI API
+- 在线服务
+	- Web界面交互
+	- 流式输出
+	- 支持停止生成
+	- 兼容OpenAI API
 
 ## 快速开始
 
-	1. 安装依赖
-		```bash
-		pip install -r requirements.txt
-		```
+1. 安装依赖
 
-	2. 配置参数
-		编辑config.ini文件，设置相关路径和参数：
-		```ini
-		[paths]
-		data_dir = /path/to/git/repos      # Git仓库目录
-		model_path = /path/to/base/model   # 基础模型路径
-		output_dir = /path/to/output       # 输出目录
-		```
+```bash
+pip install -r requirements.txt
+```
 
-	3. 收集代码
-		```bash
-		python main.py --collect_only
-		```
+2. 配置参数
 
-	4. 训练模型
-		```bash
-		python main.py --train_only
-		```
+编辑config.ini文件，设置相关路径和参数：
+```ini
+[paths]
+data_dir = /path/to/git/repos      # Git仓库目录
+model_path = /path/to/base/model   # 基础模型路径
+output_dir = /path/to/output       # 输出目录
+```
 
-	5. 启动服务
-		```bash
-		python service.py
-		```
+3. 收集代码
+
+```bash
+python main.py --collect_only
+```
+
+4. 训练模型
+
+```bash
+python main.py --train_only
+```
+
+5. 启动服务
+
+```bash
+python service.py
+```
 
 ## 配置说明(config.ini)
+
 配置文件中所有配置都是默认配置，可以通过命令行参数覆盖。
 
 ### 路径配置 [paths]
-	- data_dir: Git代码仓库的根目录
+	- data_dir: Git代码仓库的根目录，可以在一个目录中放多个仓库
 	- model_path: 基础模型路径
 	- output_dir: 模型输出目录
 	- dataset_path: 数据集文件路径
@@ -111,7 +117,7 @@
 	python main.py --train_only --model_path /path/to/model
 
 	# 启动服务
-	python service.py --model /path/to/model --lora /path/to/lora
+	python service.py --model /path/to/model --lora /path/to/lora --port 8080
 	```
 
 ### Web界面
@@ -145,24 +151,24 @@
 	- 考虑添加认证
 	- 注意日志监控
 
-## 常见问题
+## 问题
 
-	Q: 显存不足怎么办？
-		A: 可以尝试：
-		1. 使用量化(4bit/8bit)
-		2. 减小batch_size
-		3. 增加gradient_accumulation_steps
+1.显存不足怎么办？
 
-	Q: 训练效果不好怎么办？
-		A: 可以尝试：
-		1. 增加训练轮数
-		2. 调整学习率
-		3. 增加LoRA秩(r)
-		4. 改进训练数据质量
+- 使用量化(4bit/8bit)
+- 减小batch_size
+- 增加gradient_accumulation_steps
 
-	Q: 生成速度慢怎么办？
-		A: 可以尝试：
-		1. 使用更小的模型
-		2. 启用量化推理
-		3. 调整max_tokens
-		4. 使用更好的硬件
+2.训练效果不好怎么办？
+
+- 增加训练轮数
+- 调整学习率
+- 增加LoRA秩(r)
+- 改进训练数据质量
+
+3.生成速度慢怎么办？
+
+- 使用更小的模型
+- 启用量化推理
+- 调整max_tokens
+- 使用更好的硬件
