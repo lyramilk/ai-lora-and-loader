@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>代码助手</title>
+	<!-- 添加KaTeX CSS -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+	<!-- 使用完整的highlight.js包 -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+	<!-- 添加常用语言支持 -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
+	<style>
+		html, body {
+			height: 100%;
+			margin: 0;
+			padding: 0;
+			font-family: Arial, sans-serif;
+			background-color: #f5f5f5;
+		}
+		
+		body {
+			display: flex;
+			flex-direction: column;
+			padding: 20px;
+			box-sizing: border-box;
+		}
+		
+		.container {
+			flex: 1;
+			display: flex;
+			gap: 20px;
+			min-height: 0; /* 重要：允许容器缩小 */
+		}
+		
+		.left-panel {
+			flex: 1;
+			background: white;
+			padding: 20px;
+			border-radius: 8px;
+			box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+			display: flex;
+			flex-direction: column;
+			min-width: 300px;
+			max-width: 400px;
+			overflow: auto;
+		}
+		
+		.right-panel {
+			flex: 2;
+			background: white;
+			padding: 20px;
+			border-radius: 8px;
+			box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+			display: flex;
+			flex-direction: column;
+			min-width: 400px;
+		}
+		
+		.model-config {
+			margin-bottom: 20px;
+		}
+		
+		.model-config label {
+			display: block;
+			margin-bottom: 5px;
+		}
+		
+		.model-config input[type="number"] {
+			width: 100%;
+			padding: 8px;
+			margin-bottom: 10px;
+			border: 1px solid #ddd;
+			border-radius: 4px;
+			box-sizing: border-box;
+		}
+		
+		.chat-container {
+			flex: 1;
+			overflow-y: auto;
+			border: 1px solid #ddd;
+			border-radius: 4px;
+			padding: 10px;
+			margin-bottom: 10px;
+			min-height: 0; /* 重要：允许容器缩小 */
+		}
+		
+		.message {
+			margin-bottom: 10px;
+			padding: 10px;
+			border-radius: 4px;
+			word-wrap: break-word;
+		}
+		
+		.message pre {
+			margin: 0;
+		}
+		
+		.message .markdown-body {
+			margin: 0;
+		}
+		
+		.user-message {
+			background-color: #e3f2fd;
+			margin-left: 20%;
+		}
+		
+		.assistant-message {
+			background-color: #f5f5f5;
+			margin-right: 20%;
+		}
+		
+		.input-container {
+			display: flex;
+			gap: 10px;
+			margin-top: auto;
+		}
+		
+		textarea {
+			flex: 1;
+			padding: 8px;
+			border: 1px solid #ddd;
+			border-radius: 4px;
+			resize: vertical;
+			min-height: 80px;
+			max-height: 200px;
+			font-family: inherit;
+			box-sizing: border-box;
+		}
+		
+		.model-config textarea {
+			width: 100%;
+			margin-bottom: 10px;
+		}
+		
+		button {
+			padding: 8px 16px;
+			background-color: #1976d2;
+			color: white;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+			white-space: nowrap;
+		}
+		
+		button:hover {
+			background-color: #1565c0;
+		}
+		
+		button:disabled {
+			background-color: #bdbdbd;
+			cursor: not-allowed;
+		}
+		
+		pre {
+			white-space: pre-wrap;
+			word-wrap: break-word;
+			margin: 0;
+		}
+		
+		/* 响应式布局 */
+		@media (max-width: 768px) {
+			.container {
+				flex-direction: column;
+			}
+			
+			.left-panel {
+				max-width: none;
+			}
+			
+			.right-panel {
+				min-width: 0;
+			}
+		}
+		
+		/* 添加Markdown样式 */
+		.markdown-body {
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+			line-height: 1.6;
+		}
+		
+		.markdown-body h1,
+		.markdown-body h2,
+		.markdown-body h3,
+		.markdown-body h4,
+		.markdown-body h5,
+		.markdown-body h6 {
+			margin-top: 24px;
+			margin-bottom: 16px;
+			font-weight: 600;
+			line-height: 1.25;
+		}
+		
+		.markdown-body code:not(.hljs) {
+			padding: 0.2em 0.4em;
+			margin: 0;
+			font-size: 85%;
+			background-color: rgba(27,31,35,0.05);
+			border-radius: 3px;
+		}
+		
+		.markdown-body pre > code {
+			padding: 16px;
+			overflow: auto;
+			font-size: 85%;
+			line-height: 1.45;
+			background-color: #f6f8fa;
+			border-radius: 3px;
+			display: block;
+		}
+		
+		.markdown-body blockquote {
+			padding: 0 1em;
+			color: #6a737d;
+			border-left: 0.25em solid #dfe2e5;
+			margin: 0;
+		}
+		
+		#stop {
+			background-color: #d32f2f;
+		}
+		
+		#stop:hover {
+			background-color: #b71c1c;
+		}
+		
+		#stop:disabled {
+			background-color: #bdbdbd;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="left-panel">
+			<div class="model-config">
+				<h3>聊天配置</h3>
+				<label>系统提示词:</label>
+				<textarea id="system-prompt" rows="3">
+# 角色
+你是nct公司的代码助手，请根据给定的工程代码和用户问题给出详细的回答
+# 参考工程代码
+- jenkins_project_tools
+- mk-core
+- nct-player-log
+- nct-player-playlist
+- nct-player-song
+- python3-ncttools
+				</textarea>
+				
+				<label>Temperature:</label>
+				<input type="number" id="temperature" value="0.7" min="0" max="2" step="0.1">
+				
+				<label>最大生成长度:</label>
+				<input type="number" id="max-tokens" value="8192" min="1024" max="8192">
+			</div>
+		</div>
+		
+		<div class="right-panel">
+			<div class="chat-container" id="chat-container"></div>
+			<div class="input-container">
+				<textarea id="user-input" placeholder="输入你的问题..."></textarea>
+				<button id="send">发送</button>
+				<button id="stop" disabled>停止</button>
+			</div>
+		</div>
+	</div>
+	
+	<!-- 添加必要的库 -->
+	<script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+	
+	<script>
+		const sendBtn = document.getElementById('send');
+		const stopBtn = document.getElementById('stop');
+		const userInput = document.getElementById('user-input');
+		const chatContainer = document.getElementById('chat-container');
+		let currentAssistantMessage = null;
+		let isGenerating = false;
+		
+		// 配置marked
+		marked.setOptions({
+			gfm: true,
+			breaks: true,
+			highlight: function(code, lang) {
+				if (lang && hljs.getLanguage(lang)) {
+					try {
+						return hljs.highlight(lang, code).value;
+					} catch (e) {
+						console.error('代码高亮失败:', e);
+						return code;
+					}
+				}
+				return code;
+			}
+		});
+		
+		// 初始化highlight.js
+		hljs.configure({
+			ignoreUnescapedHTML: true
+		});
+		
+		// 添加消息到聊天窗口
+		function addMessage(content, isUser = false) {
+			const messageDiv = document.createElement('div');
+			messageDiv.className = `message ${isUser ? 'user-message' : 'assistant-message'}`;
+			
+			if (isUser) {
+				messageDiv.innerHTML = `<pre>${content}</pre>`;
+			} else {
+				messageDiv.innerHTML = `<div class="markdown-body">${marked.parse(content)}</div>`;
+			}
+			
+			chatContainer.appendChild(messageDiv);
+			chatContainer.scrollTop = chatContainer.scrollHeight;
+			return messageDiv;
+		}
+		
+		// 更新助手消息内容
+		function updateAssistantMessage(content) {
+			if (currentAssistantMessage) {
+				const markdownContent = marked.parse(content);
+				currentAssistantMessage.querySelector('.markdown-body').innerHTML = markdownContent;
+				chatContainer.scrollTop = chatContainer.scrollHeight;
+			}
+		}
+		
+		// 停止生成
+		async function stopGeneration() {
+			try {
+				const response = await fetch('/v1/chat/stop', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					}
+				});
+				
+				if (!response.ok) {
+					throw new Error(`HTTP error! status: ${response.status}`);
+				}
+			} catch (error) {
+				console.error('停止生成失败:', error);
+			}
+		}
+		
+		// 更新按钮状态
+		function updateButtonState(generating) {
+			isGenerating = generating;
+			sendBtn.disabled = generating;
+			stopBtn.disabled = !generating;
+			userInput.disabled = generating;
+		}
+		
+		// 处理流式响应
+		async function handleStream(response) {
+			const reader = response.body.getReader();
+			const decoder = new TextDecoder();
+			let buffer = '';
+			let content = '';
+			let isFirstChunk = true;
+			
+			try {
+				while (true && isGenerating) {  // 添加isGenerating检查
+					const {value, done} = await reader.read();
+					if (done) break;
+					
+					buffer += decoder.decode(value);
+					const lines = buffer.split('\n');
+					buffer = lines.pop();
+					
+					for (const line of lines) {
+						if (line.startsWith('data: ')) {
+							const data = line.slice(5).trim();
+							if (data === '[DONE]') continue;
+							
+							try {
+								const chunk = JSON.parse(data);
+								if (isFirstChunk) {
+									isFirstChunk = false;
+									continue;
+								}
+								if (chunk.choices[0].delta.content) {
+									content += chunk.choices[0].delta.content;
+									updateAssistantMessage(content);
+								}
+							} catch (e) {
+								console.error('解析响应失败:', e);
+							}
+						}
+					}
+				}
+			} catch (e) {
+				console.error('读取流失败:', e);
+				throw e;
+			} finally {
+				reader.cancel();  // 确保取消读取
+			}
+		}
+		
+		// 发送消息
+		async function sendMessage() {
+			const content = userInput.value.trim();
+			if (!content || isGenerating) return;
+			
+			addMessage(content, true);
+			userInput.value = '';
+			updateButtonState(true);
+			
+			try {
+				currentAssistantMessage = addMessage('', false);
+				
+				const response = await fetch('/v1/chat/completions', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Accept': 'text/event-stream'
+					},
+					body: JSON.stringify({
+						messages: [
+							{role: "system", content: document.getElementById('system-prompt').value.trim()},
+							{role: "user", content: content}
+						],
+						temperature: parseFloat(document.getElementById('temperature').value),
+						max_tokens: parseInt(document.getElementById('max-tokens').value),
+						stream: true
+					})
+				});
+				
+				if (!response.ok) {
+					throw new Error(`HTTP error! status: ${response.status}`);
+				}
+				
+				await handleStream(response);
+				
+			} catch (error) {
+				console.error('请求失败:', error);
+				updateAssistantMessage(`错误：${error.message}`);
+			} finally {
+				updateButtonState(false);
+				currentAssistantMessage = null;
+			}
+		}
+		
+		// 事件监听
+		sendBtn.addEventListener('click', sendMessage);
+		stopBtn.addEventListener('click', async () => {
+			await stopGeneration();
+			updateButtonState(false);
+		});
+		userInput.addEventListener('keydown', (e) => {
+			if (e.key === 'Enter' && !e.shiftKey && !isGenerating) {
+				e.preventDefault();
+				sendMessage();
+			}
+		});
+	</script>
+</body>
+</html> 

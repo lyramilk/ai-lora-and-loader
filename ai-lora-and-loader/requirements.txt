@@ -1,0 +1,30 @@
+	# 基础依赖
+	gitpython>=3.1.0
+	aiohttp>=3.8.0
+	
+	# 深度学习框架
+	torch>=2.0.0
+	
+	# Hugging Face相关
+	transformers>=4.36.0
+	datasets>=2.14.0
+	peft>=0.7.0
+	accelerate>=0.25.0
+	
+	# 模型量化
+	bitsandbytes>=0.41.0
+	
+	# 前端相关
+	marked>=11.1.1
+	katex>=0.16.9
+	highlight.js>=11.9.0
+	
+	# 工具库
+	tqdm>=4.65.0
+	numpy>=1.24.0
+	
+	# 可选依赖
+	sentencepiece>=0.1.99  # 用于某些tokenizer
+	protobuf>=4.25.0       # protobuf支持
+	scipy>=1.11.0          # 科学计算
+	psutil>=5.9.0          # 系统监控 
